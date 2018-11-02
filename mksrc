@@ -1,0 +1,154 @@
+#!/bin/bash
+
+############################################################################
+# 
+#  This shell is to help you create the C/C++ head file and source file
+#  You can use mksrc file_name (or with specified suffix .hh .cpp .c++)
+#
+######################### default setting ... ###############################
+
+
+AUTHOR=${CODE_AUTHOR}
+#AUTHOR='Kevin He'
+HEAD_MACRO_PREFIX=KV
+
+DEF_HEAD_SUFFIX=h
+DEF_SRC_SUFFIX=cpp
+BASENAME=Demon
+#############################################################################
+
+
+
+function show_help 
+{
+	echo "Usage: $0 [filename filename.cpp filename.hh  filename.cxx or  file.c"
+	echo "You can export CODE_AUTHOR='your name' to specified source author"
+}
+
+
+
+
+
+
+TIME=`date '+%Y-%m-%d , At %H:%M:%S'`
+if [ -n "$1" ]; then
+	SUFFIX=
+#	BASENAME=`echo ${TMP%.*}`
+	TMP=$1
+	if [ ${TMP} = help ] || [ ${TMP} = -h ] || [ ${TMP} = --help ]; then
+		show_help $0
+		exit 0
+	fi
+
+	BASENAME=${TMP%.*}
+	SUFFIX=${TMP##*.}
+#	echo " get SUFFIX ${SUFFIX}"
+	if [ ${SUFFIX} = c ] || [ ${SUFFIX} = cxx ]; then
+		DEF_SRC_SUFFIX=${SUFFIX}
+	fi
+
+	if [ ${SUFFIX} = hh ]; then
+		DEF_HEAD_SUFFIX=${SUFFIX}
+	fi
+fi
+
+if [ ! -n ${BASENAME} ]; then
+	echo "Eroor: No file given"
+	exit -1
+fi
+
+FILE_HEAD=${BASENAME}.${DEF_HEAD_SUFFIX}
+FILE_SRC=${BASENAME}.${DEF_SRC_SUFFIX}
+
+typeset -u HEAD_MACRO
+BASE_HEAD_FILE=`basename ${FILE_HEAD}`
+HEAD_MACRO=${BASE_HEAD_FILE//./_}
+HEAD_MACRO=${HEAD_MACRO_PREFIX}_${HEAD_MACRO}
+#echo ${HEAD_MACRO}
+#exit 0
+if [ -f ${FILE_HEAD} ]; then
+	echo "Error:File ${FILE_HEAD} already exits. fail !!"
+	exit -2
+fi
+
+if [ -f ${FILE_SRC} ]; then
+	echo "Error:File ${FILE_SRC} already exits. fail !!"
+	exit -3
+fi
+echo "Creating ${FILE_HEAD} and ${FILE_SRC}"
+touch ${FILE_HEAD} ${FILE_SRC}
+if [ $? -ne 0 ]; then
+	echo "create files fail"
+	exit -4
+fi
+
+
+# This is append. cat <<EOF>>${FILE_HEAD}
+for FILE in ${FILE_HEAD} ${FILE_SRC}
+do 
+cat >${FILE}<<EOF
+
+/**********************************************************************************
+ * FILE : ${FILE}
+ * Description:
+ * Author: ${AUTHOR}
+ * Created On: ${TIME}
+ * Modifiled On : 
+ * Version : 0.0.1
+ * Information :
+ **********************************************************************************/
+
+EOF
+
+if [ ${FILE} = ${FILE_HEAD} ]; then
+##### MACRO 
+cat <<EOF>>${FILE}
+#ifndef ${HEAD_MACRO}
+#define ${HEAD_MACRO}
+EOF
+
+	if [ ${DEF_SRC_SUFFIX} = c ];then 
+cat <<EOF>>${FILE}
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+EOF
+	fi 
+
+
+###### BLANK
+cat <<EOF>>${FILE}
+
+
+
+
+
+
+
+
+
+
+
+EOF
+
+
+	if [ ${DEF_SRC_SUFFIX} = c ];then 
+cat <<EOF>>${FILE}
+#ifdef __cplusplus
+}
+#endif
+
+EOF
+	fi
+#### ENDIFF
+cat <<EOF>>${FILE}
+#endif
+EOF
+else
+cat <<EOF>>${FILE}
+#include "${BASE_HEAD_FILE}"
+EOF
+fi
+sync
+done
