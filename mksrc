@@ -9,7 +9,7 @@
 
 
 AUTHOR=${CODE_AUTHOR}
-#AUTHOR='Kevin He'
+AUTHOR='Kevin He'
 HEAD_MACRO_PREFIX=KV
 
 DEF_HEAD_SUFFIX=h
@@ -87,7 +87,6 @@ fi
 for FILE in ${FILE_HEAD} ${FILE_SRC}
 do 
 cat >${FILE}<<EOF
-
 /**********************************************************************************
  * FILE : ${FILE}
  * Description:
@@ -143,7 +142,7 @@ EOF
 	fi
 #### ENDIFF
 cat <<EOF>>${FILE}
-#endif
+#endif //${FILE}
 EOF
 else
 cat <<EOF>>${FILE}
